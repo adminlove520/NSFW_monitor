@@ -4,6 +4,7 @@ import dingtalkchatbot.chatbot as cb
 import time
 import random
 import re
+from datetime import datetime, timedelta
 from .config import load_config, get_proxies
 
 # 分类颜色定义 (Decimal)
@@ -37,7 +38,7 @@ def push_message(title, content, category="Articles"):
         send_tg_bot_msg(push_config['tg_bot'].get('token'), push_config['tg_bot'].get('group_id'), formatted_title, content)
     
     # Discard推送
-    if 'discard' in push_config and push_config['discard'].get('switch', '') == "ON" and push_config['discard'].get('send_normal_msg', '') == "ON":
+    if 'discard' in push_config and push_config['discard'].get('switch', '') == "ON":
         send_discard_msg(push_config['discard'].get('webhook'), title, content, category)
 
 # 飞书推送
@@ -166,12 +167,15 @@ def send_discard_msg(webhook, title, content, category="Articles"):
         if not color:
              color = random.randint(0, 0xFFFFFF)
         
+        # 获取北京时间 (UTC+8)
+        beijing_time = (datetime.utcnow() + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+        
         embed = {
             "title": embed_title,
             "description": embed_desc,
             "color": color,
             "footer": {
-                "text": f"Powered by Rss_monitor • {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}"
+                "text": f"Powered by Rss_monitor • {beijing_time}"
             }
         }
         

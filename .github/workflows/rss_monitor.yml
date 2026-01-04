@@ -37,7 +37,6 @@ jobs:
         DISCARD_WEBHOOK: ${{ secrets.DISCARD_WEBHOOK }}
         # 强制开启 Discord 推送开关
         DISCARD_SWITCH: "ON"
-        DISCARD_SEND_NORMAL_MSG: "ON"
         # 确保其他不需要的推送关闭 (如果 config.yaml 里默认开启了)
         DINGDING_SWITCH: "OFF"
         FEISHU_SWITCH: "OFF"
@@ -53,6 +52,7 @@ jobs:
         if [[ -n $(git status --porcelain articles.db) ]]; then
           git add articles.db
           git commit -m "Update articles database [skip ci]"
+          git pull --rebase
           git push
         else
           echo "No changes to database"

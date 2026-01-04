@@ -1,0 +1,36 @@
+
+# 代理设置
+proxy:
+  enable: "OFF"
+  http_proxy: "http://127.0.0.1:7890"
+  https_proxy: "http://127.0.0.1:7890"
+  no_proxy: "localhost,127.0.0.1"
+
+# 夜间休眠 (0-7点暂停推送)
+night_sleep:
+  switch: "ON"
+
+# 推送服务配置
+push:
+  # 钉钉机器人
+  dingding:
+    webhook: "https://oapi.dingtalk.com/robot/send?access_token=你的token"
+    secret_key: "你的Key"
+    switch: "OFF"
+
+  # 飞书机器人
+  feishu:
+    webhook: "飞书的webhook地址"
+    switch: "OFF"
+
+  # Telegram Bot
+  tg_bot:
+    token: "Telegram Bot的token"
+    group_id: "Telegram Bot的group_id"
+    switch: "OFF"
+
+  # Discord
+  discard:
+    webhook: "discard的webhook地址"
+    switch: "ON"
+

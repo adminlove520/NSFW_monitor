@@ -54,7 +54,6 @@ def load_config():
     
     push_config['discard']['webhook'] = os.environ.get('DISCARD_WEBHOOK', push_config['discard'].get('webhook', ''))
     push_config['discard']['switch'] = os.environ.get('DISCARD_SWITCH', push_config['discard'].get('switch', 'OFF'))
-    push_config['discard']['send_normal_msg'] = os.environ.get('DISCARD_SEND_NORMAL_MSG', push_config['discard'].get('send_normal_msg', 'ON'))
     
     # 添加夜间休眠配置
     config['night_sleep'] = {

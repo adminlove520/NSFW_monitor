@@ -57,10 +57,9 @@ def main():
             for website, config in rss_config.items():
                 website_name = config.get("website_name", website)
                 rss_url = config.get("rss_url")
-                category = config.get("category", "Articles") # Default category
                 if not rss_url: continue
                 
-                check_for_updates(rss_url, website_name, cursor, conn, category=category)
+                check_for_updates(rss_url, website_name, cursor, conn)
         else:
             # 循环执行模式，适合本地运行
             while True:
@@ -75,10 +74,9 @@ def main():
                     for website, config in rss_config.items():
                         website_name = config.get("website_name", website)
                         rss_url = config.get("rss_url")
-                        category = config.get("category", "Articles") # Default category
                         if not rss_url: continue
                         
-                        check_for_updates(rss_url, website_name, cursor, conn, category=category)
+                        check_for_updates(rss_url, website_name, cursor, conn)
 
                     # 每二小时执行一次
                     time.sleep(7200)

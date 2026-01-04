@@ -7,39 +7,27 @@ import re
 from datetime import datetime, timedelta
 from .config import load_config, get_proxies
 
-# 分类颜色定义 (Decimal)
-CATEGORY_COLORS = {
-    'Articles': 3447003,      # Blue
-    'Social Media': 10181046, # Purple
-    'Pictures': 5763719,      # Green
-    'Videos': 15548997,       # Red
-    'Notifications': 16776960 # Yellow
-}
-
 # 推送函数
-def push_message(title, content, category="Articles"):
+def push_message(title, content):
     config = load_config()
     push_config = config.get('push', {})
     
-    # 格式化标题，增加分类标签
-    formatted_title = f"[{category}] {title}"
-    
     # 钉钉推送
     if 'dingding' in push_config and push_config['dingding'].get('switch', '') == "ON":
-        send_dingding_msg(push_config['dingding'].get('webhook'), push_config['dingding'].get('secret_key'), formatted_title,
+        send_dingding_msg(push_config['dingding'].get('webhook'), push_config['dingding'].get('secret_key'), title,
                           content)
 
     # 飞书推送
     if 'feishu' in push_config and push_config['feishu'].get('switch', '') == "ON":
-        send_feishu_msg(push_config['feishu'].get('webhook'), formatted_title, content)
+        send_feishu_msg(push_config['feishu'].get('webhook'), title, content)
 
     # Telegram Bot推送
     if 'tg_bot' in push_config and push_config['tg_bot'].get('switch', '') == "ON":
-        send_tg_bot_msg(push_config['tg_bot'].get('token'), push_config['tg_bot'].get('group_id'), formatted_title, content)
+        send_tg_bot_msg(push_config['tg_bot'].get('token'), push_config['tg_bot'].get('group_id'), title, content)
     
     # Discard推送
     if 'discard' in push_config and push_config['discard'].get('switch', '') == "ON":
-        send_discard_msg(push_config['discard'].get('webhook'), title, content, category)
+        send_discard_msg(push_config['discard'].get('webhook'), title, content)
 
 # 飞书推送
 def send_feishu_msg(webhook, title, content):
@@ -122,7 +110,7 @@ def tgbot(text, msg, token, group_id):
         print(f"Telegram推送失败: {str(e)}")
 
 # Discard推送
-def send_discard_msg(webhook, title, content, category="Articles"):
+def send_discard_msg(webhook, title, content):
     # 检查是否是占位符
     if not webhook or webhook == "discard的webhook地址":
         print(f"Discard推送跳过：webhook地址未配置")
@@ -159,13 +147,8 @@ def send_discard_msg(webhook, title, content, category="Articles"):
         except:
             pass
 
-        # 增加分类前缀到标题
-        embed_title = f"[{category}] {embed_title}"
-
-        # 获取分类对应颜色，如果没有则随机
-        color = CATEGORY_COLORS.get(category)
-        if not color:
-             color = random.randint(0, 0xFFFFFF)
+        # 随机颜色
+        color = random.randint(0, 0xFFFFFF)
         
         # 获取北京时间 (UTC+8)
         beijing_time = (datetime.utcnow() + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
@@ -186,7 +169,7 @@ def send_discard_msg(webhook, title, content, category="Articles"):
             "embeds": [embed]
         }
     
-        print(f"正在发送Discard推送：{title} (Category: {category})")
+        print(f"正在发送Discard推送：{title}")
         
         # 获取代理配置
         proxies = get_proxies()

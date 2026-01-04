@@ -8,7 +8,7 @@ def load_config():
     # 从文件加载配置
     config = {}
     try:
-        # 尝试从上级目录加载config.yaml (假设运行目录在根目录)
+        # 从上级目录加载config.yaml 
         # 或者从当前目录加载
         config_path = 'config.yaml'
         if not os.path.exists(config_path):

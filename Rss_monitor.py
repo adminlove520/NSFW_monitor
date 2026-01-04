@@ -10,6 +10,7 @@ from utils.rss import check_for_updates
 
 # 主函数
 def main():
+    start_timestamp = time.time()
     banner = '''
     +-------------------------------------------+
                    RSS Monitor
@@ -21,7 +22,8 @@ def main():
     
     # 解析命令行参数
     parser = argparse.ArgumentParser(description='RSS Monitor Script')
-    parser.add_argument('--once', action='store_true', help='Execute once (GitHub Actions)')
+    parser.add_argument('--once', action='store_true', help='Execute once and exit')
+    parser.add_argument('--time-limit', type=int, default=0, help='Maximum run time in seconds (for GitHub Actions loop)')
     args = parser.parse_args()
     
     conn = init_database()
@@ -36,50 +38,50 @@ def main():
         conn.close()
         return
 
-    # 发送启动通知消息
-    # 检查是否有任何推送服务的开关是开启的
+    # 发送启动通知消息 (仅首次)
     config = load_config()
     push_config = config.get('push', {})
-    any_push_enabled = False
-    
-    for service in push_config.values():
-        if service.get('switch', 'OFF') == 'ON':
-            any_push_enabled = True
-            break
-    
-    if any_push_enabled:
-        print("Monitor Service Started")
+    print("Monitor Service Started")
 
     try:
         if args.once:
-            # 单次执行模式，适合GitHub Action
+            # 单次执行模式
             print("Mode: Once")
-            for website, config in rss_config.items():
-                website_name = config.get("website_name", website)
-                rss_url = config.get("rss_url")
-                if not rss_url: continue
-                
-                check_for_updates(rss_url, website_name, cursor, conn)
+            run_check(rss_config, cursor, conn)
         else:
-            # 循环执行模式，适合本地运行
+            # 循环执行模式
+            print("Mode: Loop")
+            if args.time_limit > 0:
+                print(f"Time limit set to: {args.time_limit} seconds")
+
             while True:
                 try:
+                    # 检查运行时间是否超过限制
+                    if args.time_limit > 0:
+                        elapsed = time.time() - start_timestamp
+                        if elapsed > args.time_limit:
+                            print(f"Time limit reached ({elapsed:.1f}s > {args.time_limit}s). Exiting gracefully.")
+                            break
+                    
                     # 检查是否需要夜间休眠
                     if should_sleep():
-                        sleep_hours = 7 - datetime.now().hour
+                        # 获取当前北京时间小时
+                        current_bj_hour = (datetime.utcnow().hour + 8) % 24
+                        sleep_hours = 7 - current_bj_hour
                         print(f"Sleeping for {sleep_hours} hours (Night Mode)...")
+                        # 如果在Github Action中，夜间休眠可能意味着直接结束本次运行以免浪费资源
+                        if args.time_limit > 0:
+                             print("Night mode in Action, exiting.")
+                             break
                         time.sleep(sleep_hours * 3600)
                         continue
                     
-                    for website, config in rss_config.items():
-                        website_name = config.get("website_name", website)
-                        rss_url = config.get("rss_url")
-                        if not rss_url: continue
-                        
-                        check_for_updates(rss_url, website_name, cursor, conn)
+                    run_check(rss_config, cursor, conn)
 
-                    # 每二小时执行一次
-                    time.sleep(7200)
+                    # 每次检查间隔
+                    sleep_interval = 600 # 10分钟
+                    print(f"Waiting {sleep_interval}s for next check...")
+                    time.sleep(sleep_interval)
 
                 except Exception as e:
                     print(f"Error in loop: {str(e)}")
@@ -89,6 +91,14 @@ def main():
     finally:
         conn.close()
         print("Monitor Ended")
+
+def run_check(rss_config, cursor, conn):
+    for website, config in rss_config.items():
+        website_name = config.get("website_name", website)
+        rss_url = config.get("rss_url")
+        if not rss_url: continue
+        
+        check_for_updates(rss_url, website_name, cursor, conn)
 
 if __name__ == "__main__":
     main()

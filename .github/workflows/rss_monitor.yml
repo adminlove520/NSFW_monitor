@@ -14,6 +14,7 @@ on:
 jobs:
   monitor:
     runs-on: ubuntu-latest
+    timeout-minutes: 46 # 允许最大运行时间46分钟 (留1分钟缓冲)
     permissions:
       contents: write  # 允许写入仓库内容(提交db)
     
@@ -31,7 +32,7 @@ jobs:
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Run RSS Monitor
+    - name: Run RSS Monitor (Loop Mode)
       env:
         # 从 Secrets 获取 Discord Webhook
         DISCARD_WEBHOOK: ${{ secrets.DISCARD_WEBHOOK }}
@@ -42,9 +43,11 @@ jobs:
         FEISHU_SWITCH: "OFF"
         TELEGRAM_SWITCH: "OFF"
       run: |
-        python Rss_monitor.py --once
+        # 运行约 42 分钟 (2500秒), 预留时间提交数据库
+        python Rss_monitor.py --time-limit 2500
 
     - name: Commit Database Changes
+      if: always() # 即使上面的步骤出错或超时，尝试提交数据库
       run: |
         git config --global user.name 'RSS Monitor Bot'
         git config --global user.email 'bot@noreply.github.com'

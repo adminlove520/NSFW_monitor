@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from .config import load_config, get_proxies
 
 # 推送函数
-def push_message(title, content):
+def push_message(title, content, image_url=None):
     config = load_config()
     push_config = config.get('push', {})
     
@@ -27,7 +27,7 @@ def push_message(title, content):
     
     # Discard推送
     if 'discard' in push_config and push_config['discard'].get('switch', '') == "ON":
-        send_discard_msg(push_config['discard'].get('webhook'), title, content)
+        send_discard_msg(push_config['discard'].get('webhook'), title, content, image_url)
 
 # 飞书推送
 def send_feishu_msg(webhook, title, content):
@@ -110,7 +110,7 @@ def tgbot(text, msg, token, group_id):
         print(f"Telegram推送失败: {str(e)}")
 
 # Discard推送
-def send_discard_msg(webhook, title, content):
+def send_discard_msg(webhook, title, content, image_url=None):
     # 检查是否是占位符
     if not webhook or webhook == "discard的webhook地址":
         print(f"Discard推送跳过：webhook地址未配置")
@@ -164,6 +164,10 @@ def send_discard_msg(webhook, title, content):
         
         if embed_url:
             embed["url"] = embed_url
+        
+        # 如果有图片，添加到 embed
+        if image_url:
+            embed["image"] = {"url": image_url}
         
         data = {
             "embeds": [embed]

@@ -1,0 +1,16 @@
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.DS_Store
+# articles.db is needed for persistence in this specific workflow, 
+# usually databases are ignored but here we might want to track it 
+# or use a release mechanism. 
+# However, standard practice is to ignore DBs. 
+# If you want GitHub Actions to sync state, do NOT ignore articles.db
+# articles.db

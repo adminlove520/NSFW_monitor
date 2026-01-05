@@ -14,7 +14,7 @@ on:
 jobs:
   monitor:
     runs-on: ubuntu-latest
-    timeout-minutes: 60 # 允许最大运行时间60分钟 (为脚本内部2500s限制留出缓冲)
+    # timeout-minutes: 60 # Once 模式移除
     permissions:
       contents: write  # 允许写入仓库内容(提交db)
     
@@ -32,7 +32,7 @@ jobs:
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Run RSS Monitor (Loop Mode)
+    - name: Run RSS Monitor (Once Mode)
       env:
         # 从 Secrets 获取 Discord Webhook
         DISCARD_WEBHOOK: ${{ secrets.DISCARD_WEBHOOK }}
@@ -43,8 +43,8 @@ jobs:
         FEISHU_SWITCH: "OFF"
         TELEGRAM_SWITCH: "OFF"
       run: |
-        # 运行约 42 分钟 (2500秒), 预留时间提交数据库
-        python Rss_monitor.py --time-limit 2500
+        # 切换到单次运行模式
+        python Rss_monitor.py --once
 
     - name: Commit Database Changes
       if: always() # 即使上面的步骤出错或超时，尝试提交数据库

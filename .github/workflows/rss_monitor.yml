@@ -14,7 +14,7 @@ on:
 jobs:
   monitor:
     runs-on: ubuntu-latest
-    timeout-minutes: 46 # 允许最大运行时间46分钟 (留1分钟缓冲)
+    timeout-minutes: 60 # 允许最大运行时间60分钟 (为脚本内部2500s限制留出缓冲)
     permissions:
       contents: write  # 允许写入仓库内容(提交db)
     

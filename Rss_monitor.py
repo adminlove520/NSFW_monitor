@@ -82,11 +82,27 @@ def main():
 
                     # 每次检查间隔
                     sleep_interval = 600 # 10分钟
+                    
+                    if args.time_limit > 0:
+                        elapsed = time.time() - start_timestamp
+                        remaining = args.time_limit - elapsed
+                        if remaining <= 0:
+                            print("Time limit reached. Exiting before sleep.")
+                            break
+                        
+                        # 如果剩余时间不足一个完整的睡眠周期，就只睡剩下的时间并退出
+                        if remaining < sleep_interval:
+                            print(f"Time remaining ({remaining:.1f}s) is less than sleep interval. Sleeping for {remaining:.1f}s and then exiting.")
+                            if remaining > 0:
+                                time.sleep(remaining)
+                            break
+                    
                     print(f"Waiting {sleep_interval}s for next check...")
                     time.sleep(sleep_interval)
 
                 except Exception as e:
                     print(f"Error in loop: {str(e)}")
+                    # 发生错误时缩短睡眠时间，尝试恢复
                     time.sleep(60)
     except Exception as e:
         print(f"Main Error: {str(e)}")

@@ -158,7 +158,7 @@ def send_discard_msg(webhook, title, content, image_url=None):
             "description": embed_desc,
             "color": color,
             "footer": {
-                "text": f"Powered by Rss_monitor • {beijing_time}"
+                "text": f"Powered by NSFW_monitor • {beijing_time}"
             }
         }
         

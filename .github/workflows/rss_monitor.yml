@@ -4,7 +4,7 @@ name: RSS Monitor
 on:
   schedule:
     # 每2小时运行一次
-    - cron: '0 */2 * * *'
+    - cron: '0 */1 * * *'
   workflow_dispatch:
   push:
     paths:
@@ -47,7 +47,7 @@ jobs:
         python Rss_monitor.py --once
 
     - name: Commit Database Changes
-      if: always() # 即使上面的步骤出错或超时，尝试提交数据库
+      if: always() 
       run: |
         git config --global user.name 'RSS Monitor Bot'
         git config --global user.email 'bot@noreply.github.com'
